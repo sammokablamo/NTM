@@ -82,22 +82,38 @@ function Update ()
 	else if (Input.GetAxis("Vertical") < 0 && BackWheelCenter.rpm <= 0)//figure out whether to reverse
 	{
 		CurrentGear = 0;
-		BackWheelCenter.motorTorque = (EngineTorque / GearRatio[CurrentGear] * Input.GetAxis("Vertical"))*.5;
+		BackWheelCenter.motorTorque = (EngineTorque / GearRatio[CurrentGear] * Input.GetAxis("Vertical"))*.25;
 		Debug.Log ("Reverse", gameObject);
 		
 	}
 	
-	//zero out torque if you're done reversing
+	//zero out torque if you're done reversing over time.
 	if ( BackWheelCenter.motorTorque < 0 && Input.GetAxis("Vertical") >= 0 && BackWheelCenter.rpm == 0) //gradually reset torque back to zero if it's negative
 	{
+		if (BackWheelCenter.motorTorque < -.5)
+		{
+			BackWheelCenter.motorTorque = 0;
+		}
+		else
+		{
 		BackWheelCenter.motorTorque = Mathf.InverseLerp(BackWheelCenter.motorTorque, 0, 10 * Time.deltaTime);
 		Debug.Log ("Torque Disappating" + BackWheelCenter.motorTorque, gameObject);
 		Debug.Log ("CurrentVerticalInput: " + Input.GetAxis("Vertical"), gameObject);
+		}
 	}
-	
-	if (Input.GetAxis("Vertical") == 0  && BackWheelCenter.rpm >= 0 && BackWheelCenter.motorTorque >= 0)
+	//zero out torque if going forward over time
+	else if (Input.GetAxis("Vertical") == 0  && BackWheelCenter.rpm >= 0 && BackWheelCenter.motorTorque >= 0)
 	{
-		BackWheelCenter.motorTorque = Mathf.InverseLerp(BackWheelCenter.motorTorque, 0, 10 * Time.deltaTime);
+		if (BackWheelCenter.motorTorque < -.5)
+		{
+			BackWheelCenter.motorTorque = 0;
+		}
+		else
+		{
+			BackWheelCenter.motorTorque = Mathf.InverseLerp(BackWheelCenter.motorTorque, 0, 10 * Time.deltaTime);
+			Debug.Log ("Torque Disappating" + BackWheelCenter.motorTorque, gameObject);
+			Debug.Log ("CurrentVerticalInput: " + Input.GetAxis("Vertical"), gameObject);
+		}
 	}
 
 	SetBackWheelChildrenTorque(); //set children back wheel torque to follow center wheel
@@ -222,7 +238,7 @@ function SetSteerAngle()
 }
 function Brake()
 {
-	BackWheelCenter.brakeTorque = 200 * Mathf.Abs(Input.GetAxis("Vertical")); //apply brake to all wheels based on user input
+	BackWheelCenter.brakeTorque = 100 * Mathf.Abs(Input.GetAxis("Vertical")); //apply brake to all wheels based on user input
 	
 	//update other parts of wheel
 	BackWheelLTOuter.brakeTorque = BackWheelCenter.brakeTorque ;
