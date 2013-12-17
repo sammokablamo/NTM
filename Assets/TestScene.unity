@@ -3935,9 +3935,9 @@ MonoBehaviour:
   CurrentGear: 0
   EngineTorque: 2000
   MaxEngineRPM: 8000
-  MinEngineRPM: 750
+  MinEngineRPM: 0
   BIKE: {fileID: 656266084}
-  centerOfMass: -3
+  centerOfMass: -2
 --- !u!82 &656266086
 AudioSource:
   m_ObjectHideFlags: 0
@@ -4069,7 +4069,7 @@ Rigidbody:
   m_GameObject: {fileID: 656266083}
   serializedVersion: 2
   m_Mass: 2000
-  m_Drag: .150000006
+  m_Drag: 5
   m_AngularDrag: .0500000007
   m_UseGravity: 1
   m_IsKinematic: 0

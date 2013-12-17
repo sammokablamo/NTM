@@ -10,18 +10,16 @@
 
 
 
-// These variables allow the script to power the wheels of the car.
-var BackWheelCenter : WheelCollider;
-//sam:adding extra colliders to add thickness
-var BackWheelLTOuter : WheelCollider;
+
+var BackWheelCenter : WheelCollider; // These variables allow the script to power the wheels of the car.
+var BackWheelLTOuter : WheelCollider; //sam:adding extra colliders to add thickness
 var BackWheelRTOuter : WheelCollider;
 var BackWheelLTMid : WheelCollider;
 var BackWheelRTMid : WheelCollider;
 
-//sam: added slot from front wheel
-var FrontWheelCenter : WheelCollider;
-//sam:adding extra colliders to add thickness
-var FrontWheelLTOuter : WheelCollider;
+
+var FrontWheelCenter : WheelCollider; //sam: added slot from front wheel
+var FrontWheelLTOuter : WheelCollider;//sam:adding extra colliders to add thickness
 var FrontWheelRTOuter : WheelCollider;
 var FrontWheelLTMid : WheelCollider;
 var FrontWheelRTMid : WheelCollider;
@@ -50,42 +48,85 @@ function Start () {
 	rigidbody.centerOfMass.y = centerOfMass;
 }
 
-function Update () {
-	
+function Update () 
+{
 	// This is to limith the maximum speed of the car, adjusting the drag probably isn't the best way of doing it,
 	// but it's easy, and it doesn't interfere with the physics processing.
-	rigidbody.drag = rigidbody.velocity.magnitude / 250;
-	
-	// Compute the engine RPM based on the average RPM of the two wheels, then call the shift gear function
-	EngineRPM = BackWheelCenter.rpm * GearRatio[CurrentGear];
+	rigidbody.drag = rigidbody.velocity.magnitude / 250;	
+	EngineRPM = BackWheelCenter.rpm * GearRatio[CurrentGear]; // Compute the engine RPM based on the average RPM of the two wheels, then call the shift gear function
 	ShiftGears();
-
+	
 	// set the audio pitch to the percentage of RPM to the maximum RPM plus one, this makes the sound play
 	// up to twice it's pitch, where it will suddenly drop when it switches gears.
 	audio.pitch = Mathf.Abs(EngineRPM / MaxEngineRPM) + 1.0 ;
 	// this line is just to ensure that the pitch does not reach a value higher than is desired.
-	if ( audio.pitch > 2.0 ) {
+	if ( audio.pitch > 2.0 ) 
+	{
 		audio.pitch = 2.0;
 	}
 
 	// finally, apply the values to the wheels.	The torque applied is divided by the current gear, and
-	// multiplied by the user input variable.
-	BackWheelCenter.motorTorque = EngineTorque / GearRatio[CurrentGear] * Input.GetAxis("Vertical");
-	//Debug.Log ("Current RPM :" + BackWheelCenter.rpm, gameObject);
+	// multiplied by the user input variable.a
+	if (Input.GetAxis("Vertical") > 0  && BackWheelCenter.rpm >= 0 && BackWheelCenter.motorTorque >= 0) //vertical input is positive then apply torque
+	{
 	
-	SetBackWheelChildren();	//sam: Set all other parts of back tire to equal torque of center
-	SetSteerAngle(); 	// the steer angle is an arbitrary value multiplied by the user input. amount of steering affecting direction dissipates as RPM increases.
-
+		Debug.Log ("Forward", gameObject);
+		BackWheelCenter.motorTorque = EngineTorque / GearRatio[CurrentGear] * Input.GetAxis("Vertical");
+	}
+	
+	if (Input.GetAxis("Vertical") < 0 && BackWheelCenter.rpm > 0 && BackWheelCenter.motorTorque >= 0)//figure out whether to apply breaks
+	{
+		Brake();
+		Debug.Log ("Braking", gameObject);
+	}
+	else if (Input.GetAxis("Vertical") < 0 && BackWheelCenter.rpm <= 0)//figure out whether to reverse
+	{
+		CurrentGear = 0;
+		BackWheelCenter.motorTorque = (EngineTorque / GearRatio[CurrentGear] * Input.GetAxis("Vertical"))*.5;
+		Debug.Log ("Reverse", gameObject);
 		
+	}
 	
-	// sam: set other parts of front wheel to mimic steer angle of center wheel collider
+	//zero out torque if you're done reversing
+	if ( BackWheelCenter.motorTorque < 0 && Input.GetAxis("Vertical") >= 0 && BackWheelCenter.rpm == 0) //gradually reset torque back to zero if it's negative
+	{
+		BackWheelCenter.motorTorque = Mathf.InverseLerp(BackWheelCenter.motorTorque, 0, 10 * Time.deltaTime);
+		Debug.Log ("Torque Disappating" + BackWheelCenter.motorTorque, gameObject);
+		Debug.Log ("CurrentVerticalInput: " + Input.GetAxis("Vertical"), gameObject);
+	}
 	
-	FrontWheelLTOuter.steerAngle = FrontWheelCenter.steerAngle;
-	FrontWheelRTOuter.steerAngle = FrontWheelCenter.steerAngle;
-	FrontWheelLTMid.steerAngle = FrontWheelCenter.steerAngle;
-	FrontWheelRTMid.steerAngle = FrontWheelCenter.steerAngle;
+	if (Input.GetAxis("Vertical") == 0  && BackWheelCenter.rpm >= 0 && BackWheelCenter.motorTorque >= 0)
+	{
+		BackWheelCenter.motorTorque = Mathf.InverseLerp(BackWheelCenter.motorTorque, 0, 10 * Time.deltaTime);
+	}
+
+	SetBackWheelChildrenTorque(); //set children back wheel torque to follow center wheel
+	Debug.Log ("Current RPM :" + BackWheelCenter.rpm, gameObject);
+	Debug.Log ("Current Torque :" + BackWheelCenter.motorTorque, gameObject);
+
+	SetSteerAngle(); 	// the steer angle is an arbitrary value multiplied by the user input. amount of steering affecting direction dissipates as RPM increases
+	SetFrontWheelChildrenAngle(); // sam: set other parts of front wheel to mimic steer angle of center wheel collider	
+}
+	
+ //FixedUpdate should be used instead of Update when dealing with Rigidbody. 
+function FixedUpdate ()
+{
+	//Debug.Log ("Vector3.up is currently:" + BIKE.up, gameObject);
+	if	(BackWheelCenter.isGrounded == true) //if back wheel is touching ground, let tilt be driven by horizontal input tempered by speed
+	{
+		BIKE.rotation.eulerAngles.z = Mathf.LerpAngle(BIKE.rotation.eulerAngles.z, -30 * Input.GetAxis("Horizontal") * (BackWheelCenter.rpm / MaxEngineRPM), 5 * Time.deltaTime);
+	}
+	//This script attempts to keep bike upright
+	else if ( Vector3.Angle( Vector3.up, BIKE.up ) < 30) 
+	{ //if the angle between the bike.up vector and the vertical vector up is less than 30 degrees
+    	BIKE.rotation = Quaternion.Slerp( BIKE.rotation, Quaternion.Euler( 0, BIKE.rotation.eulerAngles.y, 0 ), Time.deltaTime * 5 ); //set the bike rotation equal to : spherical interpolation from "current bike rotation" towards "
+	}
 }
 
+
+/*********************
+**Utility Functions:**
+**********************/
 function ShiftGears() {
 	// this function shifts the gears of the vehcile, it loops through all the gears, checking which will make
 	// the engine RPM fall within the desired range. The gear is then set to this "appropriate" value.
@@ -115,21 +156,8 @@ function ShiftGears() {
 		CurrentGear = AppropriateGear;
 	}
 }
-//This script attempts to keep bike upright
-function FixedUpdate () 
-{
-	//Debug.Log ("Vector3.up is currently:" + BIKE.up, gameObject);
-	if	(BackWheelCenter.isGrounded == true) //if back wheel is touching ground, let tilt be driven by horizontal input tempered by speed
-	{
-		BIKE.rotation.eulerAngles.z = Mathf.LerpAngle(BIKE.rotation.eulerAngles.z, -30 * Input.GetAxis("Horizontal") * (BackWheelCenter.rpm / MaxEngineRPM), 5 * Time.deltaTime);
-	}
-	else if ( Vector3.Angle( Vector3.up, BIKE.up ) < 30) { //if the angle between the bike.up vector and the vertical vector up is less than 30 degrees
 
-    BIKE.rotation = Quaternion.Slerp( BIKE.rotation, Quaternion.Euler( 0, BIKE.rotation.eulerAngles.y, 0 ), Time.deltaTime * 10 ); //set the bike rotation equal to : spherical interpolation from "current bike rotation" towards "
-	}
-}
-
-function SetBackWheelChildren() 	//sam: Set all other parts of back tire to equal torque of center
+function SetBackWheelChildrenTorque() 	//sam: Set all other parts of back tire to equal torque of center
 {
 	BackWheelLTOuter.motorTorque = BackWheelCenter.motorTorque ;
 	BackWheelRTOuter.motorTorque = BackWheelCenter.motorTorque ;
@@ -137,20 +165,22 @@ function SetBackWheelChildren() 	//sam: Set all other parts of back tire to equa
 	BackWheelRTMid.motorTorque = BackWheelCenter.motorTorque ;
 }
 
+function SetFrontWheelChildrenAngle()
+{
+	FrontWheelLTOuter.steerAngle = FrontWheelCenter.steerAngle;
+	FrontWheelRTOuter.steerAngle = FrontWheelCenter.steerAngle;
+	FrontWheelLTMid.steerAngle = FrontWheelCenter.steerAngle;
+	FrontWheelRTMid.steerAngle = FrontWheelCenter.steerAngle;
+}
+
 function SetSteerAngle()
 {
 	// the steer angle is an arbitrary value multiplied by the user input.
-	// sam: changed this to be front wheel steering
 	//default multiple was 10
 	//trying to make this steer less at high speeds.
 	//MaxEngineRPM tr
 	//original: FrontWheelCenter.steerAngle = 60 * Input.GetAxis("Horizontal");
-	//FUCK THIS, do a hack and do something that feels right.
-	//as player gets to high speed. bike angle locks to horizontal input. effect on steer angle is minimized
-	//* (1 - BackWheelCenter.rpm / 500)
-	//bike angle is always locked to 
 	//after a certain speed bike explodes on impact
-	//implement breaks
 	
 	if (BackWheelCenter.rpm < 100)
 	{
@@ -190,6 +220,24 @@ function SetSteerAngle()
 	}
 	//Debug.Log ("Current SteerAngle :" + FrontWheelCenter.steerAngle, gameObject);
 }
+function Brake()
+{
+	BackWheelCenter.brakeTorque = 200 * Mathf.Abs(Input.GetAxis("Vertical")); //apply brake to all wheels based on user input
+	
+	//update other parts of wheel
+	BackWheelLTOuter.brakeTorque = BackWheelCenter.brakeTorque ;
+	BackWheelRTOuter.brakeTorque = BackWheelCenter.brakeTorque ;
+	BackWheelLTMid.brakeTorque = BackWheelCenter.brakeTorque ;
+	BackWheelRTMid.brakeTorque = BackWheelCenter.brakeTorque ;
+		
+	FrontWheelCenter.brakeTorque = BackWheelCenter.brakeTorque ;
+	FrontWheelLTOuter.brakeTorque = BackWheelCenter.brakeTorque ;
+	FrontWheelRTOuter.brakeTorque = BackWheelCenter.brakeTorque ;
+	FrontWheelLTMid.brakeTorque = BackWheelCenter.brakeTorque ;
+	FrontWheelRTMid.brakeTorque = BackWheelCenter.brakeTorque ;
+}
+
+
 
 /*
  As you may see bike wheel has a round tire. And this is the main reason why bike is turning. 
