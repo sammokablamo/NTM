@@ -73,61 +73,11 @@ function Update () {
 	BackWheelCenter.motorTorque = EngineTorque / GearRatio[CurrentGear] * Input.GetAxis("Vertical");
 	Debug.Log ("Current RPM :" + BackWheelCenter.rpm, gameObject);
 	
-	//sam: Set all other parts of back tire to equal torque of center
-	BackWheelLTOuter.motorTorque = BackWheelCenter.motorTorque ;
-	BackWheelRTOuter.motorTorque = BackWheelCenter.motorTorque ;
-	BackWheelLTMid.motorTorque = BackWheelCenter.motorTorque ;
-	BackWheelRTMid.motorTorque = BackWheelCenter.motorTorque ;
+	SetBackWheelChildren();	//sam: Set all other parts of back tire to equal torque of center
+	SetSteerAngle(); 	// the steer angle is an arbitrary value multiplied by the user input. amount of steering affecting direction dissipates as RPM increases.
+
 		
-	// the steer angle is an arbitrary value multiplied by the user input.
-	// sam: changed this to be front wheel steering
-	//default multiple was 10
-	//trying to make this steer less at high speeds.
-	//MaxEngineRPM tr
-	//original: FrontWheelCenter.steerAngle = 60 * Input.GetAxis("Horizontal");
-	//FUCK THIS, do a hack and do something that feels right.
-	//as player gets to high speed. bike angle locks to horizontal input. effect on steer angle is minimized
-	//* (1 - BackWheelCenter.rpm / 500)
-	//bike angle is always locked to 
-	//after a certain speed bike explodes on impact
-	//implement breaks
-	if (BackWheelCenter.rpm < 100)
-	{
-		FrontWheelCenter.steerAngle = 60 * Input.GetAxis("Horizontal") ;
-	}
-	else if(BackWheelCenter.rpm >= 100 && BackWheelCenter.rpm < 200)
-	{
-		FrontWheelCenter.steerAngle = 50 * Input.GetAxis("Horizontal") ;
-	}
-	else if(BackWheelCenter.rpm >= 200 && BackWheelCenter.rpm < 300)
-	{
-		FrontWheelCenter.steerAngle = 40 * Input.GetAxis("Horizontal") ;
-	}
-	else if(BackWheelCenter.rpm >= 300 && BackWheelCenter.rpm < 400)
-	{
-		FrontWheelCenter.steerAngle = 30 * Input.GetAxis("Horizontal") ;
-	}
-	else if(BackWheelCenter.rpm >= 400 && BackWheelCenter.rpm < 500)
-	{
-		FrontWheelCenter.steerAngle = 20 * Input.GetAxis("Horizontal") ;
-	}
-	else if(BackWheelCenter.rpm >= 500 && BackWheelCenter.rpm < 600)
-	{
-		FrontWheelCenter.steerAngle = 20 * Input.GetAxis("Horizontal") ;
-	}
-	else if(BackWheelCenter.rpm >= 600 && BackWheelCenter.rpm < 700)
-	{
-		FrontWheelCenter.steerAngle = 10 * Input.GetAxis("Horizontal") ;
-	}
-	else if(BackWheelCenter.rpm >= 700 && BackWheelCenter.rpm < 800)
-	{
-		FrontWheelCenter.steerAngle = 5 * Input.GetAxis("Horizontal") ;
-	}
-		else
-	{
-		FrontWheelCenter.steerAngle = 2 * Input.GetAxis("Horizontal") ;
-	}
-	Debug.Log ("Current SteerAngle :" + FrontWheelCenter.steerAngle, gameObject);
+	
 	// sam: set other parts of front wheel to mimic steer angle of center wheel collider
 	
 	FrontWheelLTOuter.steerAngle = FrontWheelCenter.steerAngle;
@@ -170,9 +120,72 @@ function FixedUpdate () {
 Debug.Log ("Vector3.up is currently:" + BIKE.up, gameObject);
    if ( Vector3.Angle( Vector3.up, BIKE.up ) < 30) {
 
-    BIKE.rotation = Quaternion.Slerp( BIKE.rotation, Quaternion.Euler( 0, BIKE.rotation.eulerAngles.y, 0 ), Time.deltaTime * 5 );
+    BIKE.rotation = Quaternion.Slerp( BIKE.rotation, Quaternion.Euler( 0, BIKE.rotation.eulerAngles.y, 0 ), Time.deltaTime * 10 );
 	}
 }
+
+function SetBackWheelChildren() 	//sam: Set all other parts of back tire to equal torque of center
+{
+	BackWheelLTOuter.motorTorque = BackWheelCenter.motorTorque ;
+	BackWheelRTOuter.motorTorque = BackWheelCenter.motorTorque ;
+	BackWheelLTMid.motorTorque = BackWheelCenter.motorTorque ;
+	BackWheelRTMid.motorTorque = BackWheelCenter.motorTorque ;
+}
+
+function SetSteerAngle()
+{
+	// the steer angle is an arbitrary value multiplied by the user input.
+	// sam: changed this to be front wheel steering
+	//default multiple was 10
+	//trying to make this steer less at high speeds.
+	//MaxEngineRPM tr
+	//original: FrontWheelCenter.steerAngle = 60 * Input.GetAxis("Horizontal");
+	//FUCK THIS, do a hack and do something that feels right.
+	//as player gets to high speed. bike angle locks to horizontal input. effect on steer angle is minimized
+	//* (1 - BackWheelCenter.rpm / 500)
+	//bike angle is always locked to 
+	//after a certain speed bike explodes on impact
+	//implement breaks
+	
+	if (BackWheelCenter.rpm < 100)
+	{
+		FrontWheelCenter.steerAngle = 60 * Input.GetAxis("Horizontal") ;
+	}
+	else if(BackWheelCenter.rpm >= 100 && BackWheelCenter.rpm < 200)
+	{
+		FrontWheelCenter.steerAngle = 50 * Input.GetAxis("Horizontal") ;
+	}
+	else if(BackWheelCenter.rpm >= 200 && BackWheelCenter.rpm < 300)
+	{
+		FrontWheelCenter.steerAngle = 40 * Input.GetAxis("Horizontal") ;
+	}
+	else if(BackWheelCenter.rpm >= 300 && BackWheelCenter.rpm < 400)
+	{
+		FrontWheelCenter.steerAngle = 30 * Input.GetAxis("Horizontal") ;
+	}
+	else if(BackWheelCenter.rpm >= 400 && BackWheelCenter.rpm < 500)
+	{
+		FrontWheelCenter.steerAngle = 20 * Input.GetAxis("Horizontal") ;
+	}
+	else if(BackWheelCenter.rpm >= 500 && BackWheelCenter.rpm < 600)
+	{
+		FrontWheelCenter.steerAngle = 20 * Input.GetAxis("Horizontal") ;
+	}
+	else if(BackWheelCenter.rpm >= 600 && BackWheelCenter.rpm < 700)
+	{
+		FrontWheelCenter.steerAngle = 10 * Input.GetAxis("Horizontal") ;
+	}
+	else if(BackWheelCenter.rpm >= 700 && BackWheelCenter.rpm < 800)
+	{
+		FrontWheelCenter.steerAngle = 5 * Input.GetAxis("Horizontal") ;
+	}
+		else
+	{
+		FrontWheelCenter.steerAngle = 2 * Input.GetAxis("Horizontal") ;
+	}
+	Debug.Log ("Current SteerAngle :" + FrontWheelCenter.steerAngle, gameObject);
+}
+
 /*
  As you may see bike wheel has a round tire. And this is the main reason why bike is turning. 
  Not because of rotation of front wheel(honestly, it's main reason of lean) but because of lean.

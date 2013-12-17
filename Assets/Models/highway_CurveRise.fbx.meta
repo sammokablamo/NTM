@@ -11,8 +11,10 @@ ModelImporter:
     400004: highway_curveRise_COL
     2300000: highway_curveRise
     2300002: highway_curveRise_COL
+    2300004: //RootNode
     3300000: highway_curveRise
     3300002: highway_curveRise_COL
+    3300004: //RootNode
     4300000: highway_curveRise
     4300002: highway_curveRise_COL
     9500000: //RootNode
