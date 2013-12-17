@@ -71,7 +71,7 @@ function Update () {
 	// finally, apply the values to the wheels.	The torque applied is divided by the current gear, and
 	// multiplied by the user input variable.
 	BackWheelCenter.motorTorque = EngineTorque / GearRatio[CurrentGear] * Input.GetAxis("Vertical");
-	Debug.Log ("Current RPM :" + BackWheelCenter.rpm, gameObject);
+	//Debug.Log ("Current RPM :" + BackWheelCenter.rpm, gameObject);
 	
 	SetBackWheelChildren();	//sam: Set all other parts of back tire to equal torque of center
 	SetSteerAngle(); 	// the steer angle is an arbitrary value multiplied by the user input. amount of steering affecting direction dissipates as RPM increases.
@@ -116,11 +116,16 @@ function ShiftGears() {
 	}
 }
 //This script attempts to keep bike upright
-function FixedUpdate () {
-Debug.Log ("Vector3.up is currently:" + BIKE.up, gameObject);
-   if ( Vector3.Angle( Vector3.up, BIKE.up ) < 30) {
+function FixedUpdate () 
+{
+	//Debug.Log ("Vector3.up is currently:" + BIKE.up, gameObject);
+	if	(BackWheelCenter.isGrounded == true) //if back wheel is touching ground, let tilt be driven by horizontal input tempered by speed
+	{
+		BIKE.rotation.eulerAngles.z = Mathf.LerpAngle(BIKE.rotation.eulerAngles.z, -30 * Input.GetAxis("Horizontal") * (BackWheelCenter.rpm / MaxEngineRPM), 5 * Time.deltaTime);
+	}
+	else if ( Vector3.Angle( Vector3.up, BIKE.up ) < 30) { //if the angle between the bike.up vector and the vertical vector up is less than 30 degrees
 
-    BIKE.rotation = Quaternion.Slerp( BIKE.rotation, Quaternion.Euler( 0, BIKE.rotation.eulerAngles.y, 0 ), Time.deltaTime * 10 );
+    BIKE.rotation = Quaternion.Slerp( BIKE.rotation, Quaternion.Euler( 0, BIKE.rotation.eulerAngles.y, 0 ), Time.deltaTime * 10 ); //set the bike rotation equal to : spherical interpolation from "current bike rotation" towards "
 	}
 }
 
@@ -183,7 +188,7 @@ function SetSteerAngle()
 	{
 		FrontWheelCenter.steerAngle = 2 * Input.GetAxis("Horizontal") ;
 	}
-	Debug.Log ("Current SteerAngle :" + FrontWheelCenter.steerAngle, gameObject);
+	//Debug.Log ("Current SteerAngle :" + FrontWheelCenter.steerAngle, gameObject);
 }
 
 /*

@@ -2731,25 +2731,25 @@ WheelCollider:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 4321656}
   m_Center: {x: 0, y: .360007286, z: 1.81556702}
-  m_Radius: .535000026
-  m_SuspensionDistance: .25
+  m_Radius: .360000014
+  m_SuspensionDistance: .100000001
   m_SuspensionSpring:
     spring: 900
-    damper: 90
+    damper: 100
     targetPosition: .0199999996
-  m_Mass: .25
+  m_Mass: 2
   m_ForwardFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .0920000002
+    stiffnessFactor: 1
   m_SidewaysFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .5
+    stiffnessFactor: 1
   m_Enabled: 1
 --- !u!1 &15896724
 GameObject:
@@ -2922,25 +2922,25 @@ WheelCollider:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 73273642}
   m_Center: {x: 0, y: .482318401, z: -1.18211198}
-  m_Radius: .460000008
-  m_SuspensionDistance: .25
+  m_Radius: .360000014
+  m_SuspensionDistance: .100000001
   m_SuspensionSpring:
     spring: 900
-    damper: 90
+    damper: 100
     targetPosition: .0199999996
-  m_Mass: .25
+  m_Mass: 2
   m_ForwardFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .0920000002
+    stiffnessFactor: 1
   m_SidewaysFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .5
+    stiffnessFactor: 1
   m_Enabled: 1
 --- !u!1 &128430031
 GameObject:
@@ -3594,25 +3594,25 @@ WheelCollider:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 566453881}
   m_Center: {x: 0, y: .482318401, z: -1.18211198}
-  m_Radius: .519999981
-  m_SuspensionDistance: .25
+  m_Radius: .360000014
+  m_SuspensionDistance: .100000001
   m_SuspensionSpring:
     spring: 900
-    damper: 90
+    damper: 100
     targetPosition: .0199999996
-  m_Mass: .25
+  m_Mass: 2
   m_ForwardFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .0920000002
+    stiffnessFactor: 1
   m_SidewaysFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .5
+    stiffnessFactor: 1
   m_Enabled: 1
 --- !u!1 &575111938
 GameObject:
@@ -3675,25 +3675,25 @@ WheelCollider:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 578873095}
   m_Center: {x: 0, y: .360007286, z: 1.81556702}
-  m_Radius: .449999988
-  m_SuspensionDistance: .25
+  m_Radius: .360000014
+  m_SuspensionDistance: .100000001
   m_SuspensionSpring:
     spring: 900
-    damper: 90
+    damper: 100
     targetPosition: .0199999996
-  m_Mass: .25
+  m_Mass: 2
   m_ForwardFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .0920000002
+    stiffnessFactor: 1
   m_SidewaysFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .5
+    stiffnessFactor: 1
   m_Enabled: 1
 --- !u!1 &587365958
 GameObject:
@@ -3781,25 +3781,25 @@ WheelCollider:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 610222591}
   m_Center: {x: 0, y: .360007286, z: 1.81556702}
-  m_Radius: .449999988
-  m_SuspensionDistance: .25
+  m_Radius: .360000014
+  m_SuspensionDistance: .100000001
   m_SuspensionSpring:
     spring: 900
-    damper: 90
+    damper: 100
     targetPosition: .0199999996
-  m_Mass: .25
+  m_Mass: 2
   m_ForwardFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .0920000002
+    stiffnessFactor: 1
   m_SidewaysFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .5
+    stiffnessFactor: 1
   m_Enabled: 1
 --- !u!4 &610222593
 Transform:
@@ -3933,9 +3933,9 @@ MonoBehaviour:
   - 1.03999996
   - .949999988
   CurrentGear: 0
-  EngineTorque: 500
-  MaxEngineRPM: 4000
-  MinEngineRPM: 50
+  EngineTorque: 2000
+  MaxEngineRPM: 8000
+  MinEngineRPM: 750
   BIKE: {fileID: 656266084}
   centerOfMass: -3
 --- !u!82 &656266086
@@ -4068,7 +4068,7 @@ Rigidbody:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 656266083}
   serializedVersion: 2
-  m_Mass: 1600
+  m_Mass: 2000
   m_Drag: .150000006
   m_AngularDrag: .0500000007
   m_UseGravity: 1
@@ -4225,25 +4225,25 @@ WheelCollider:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 722983723}
   m_Center: {x: 0, y: .482318401, z: -1.18211198}
-  m_Radius: .535000026
-  m_SuspensionDistance: .25
+  m_Radius: .360000014
+  m_SuspensionDistance: .100000001
   m_SuspensionSpring:
     spring: 900
-    damper: 90
+    damper: 100
     targetPosition: .0199999996
-  m_Mass: .25
+  m_Mass: 2
   m_ForwardFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .0920000002
+    stiffnessFactor: 1
   m_SidewaysFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .5
+    stiffnessFactor: 1
   m_Enabled: 1
 --- !u!1001 &776273353
 Prefab:
@@ -4734,25 +4734,25 @@ WheelCollider:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 923165617}
   m_Center: {x: 0, y: .482318401, z: -1.18211198}
-  m_Radius: .519999981
-  m_SuspensionDistance: .25
+  m_Radius: .360000014
+  m_SuspensionDistance: .100000001
   m_SuspensionSpring:
     spring: 900
-    damper: 90
+    damper: 100
     targetPosition: .0199999996
-  m_Mass: .25
+  m_Mass: 2
   m_ForwardFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .0920000002
+    stiffnessFactor: 1
   m_SidewaysFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .5
+    stiffnessFactor: 1
   m_Enabled: 1
 --- !u!1 &943933466
 GameObject:
@@ -4788,25 +4788,25 @@ WheelCollider:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 943933466}
   m_Center: {x: 0, y: .482318401, z: -1.18211198}
-  m_Radius: .460000008
-  m_SuspensionDistance: .25
+  m_Radius: .360000014
+  m_SuspensionDistance: .100000001
   m_SuspensionSpring:
     spring: 900
-    damper: 90
+    damper: 100
     targetPosition: .0199999996
-  m_Mass: .25
+  m_Mass: 2
   m_ForwardFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .0920000002
+    stiffnessFactor: 1
   m_SidewaysFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .5
+    stiffnessFactor: 1
   m_Enabled: 1
 --- !u!1 &982517849
 GameObject:
@@ -5295,25 +5295,25 @@ WheelCollider:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1394435326}
   m_Center: {x: 0, y: .360007286, z: 1.81556702}
-  m_Radius: .524999976
-  m_SuspensionDistance: .25
+  m_Radius: .360000014
+  m_SuspensionDistance: .100000001
   m_SuspensionSpring:
     spring: 900
-    damper: 90
+    damper: 100
     targetPosition: .0199999996
-  m_Mass: .25
+  m_Mass: 2
   m_ForwardFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .0920000002
+    stiffnessFactor: 1
   m_SidewaysFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .5
+    stiffnessFactor: 1
   m_Enabled: 1
 --- !u!1001 &1441015849
 Prefab:
@@ -6448,25 +6448,25 @@ WheelCollider:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2047609535}
   m_Center: {x: 0, y: .360007286, z: 1.81556702}
-  m_Radius: .524999976
-  m_SuspensionDistance: .25
+  m_Radius: .360000014
+  m_SuspensionDistance: .100000001
   m_SuspensionSpring:
     spring: 900
-    damper: 90
+    damper: 100
     targetPosition: .0199999996
-  m_Mass: .25
+  m_Mass: 2
   m_ForwardFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .0920000002
+    stiffnessFactor: 1
   m_SidewaysFriction:
     extremumSlip: 1
     extremumValue: 20000
     asymptoteSlip: 2
     asymptoteValue: 10000
-    stiffnessFactor: .5
+    stiffnessFactor: 1
   m_Enabled: 1
 --- !u!4 &2047609537
 Transform:
