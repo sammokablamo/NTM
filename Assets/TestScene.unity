@@ -3882,6 +3882,8 @@ GameObject:
   - 54: {fileID: 656266087}
   - 82: {fileID: 656266086}
   - 114: {fileID: 656266085}
+  - 114: {fileID: 656266092}
+  - 114: {fileID: 656266091}
   m_Layer: 0
   m_Name: PlayerMotorcycle
   m_TagString: Untagged
@@ -4119,6 +4121,39 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 656266083}
   m_Mesh: {fileID: 4300004, guid: 5f65f85e68bbb3948a73219b29992ace, type: 3}
+--- !u!114 &656266091
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 656266083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 313ba1ef9a9924ae9861a2a0776e4660, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debug: 1
+  continuousScan: 1
+  observedPlayer: 1
+  deadzoneType: 2
+  deadzone: .25
+  triggerThreshold: .100000001
+--- !u!114 &656266092
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 656266083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79a31d3a5605d46c4b7d81710f4f1023, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  continuousScan: 0
+  player: 1
+  deadzoneType: 1
+  deadzone: .25
+  triggerTreshold: .200000003
 --- !u!1001 &687853450
 Prefab:
   m_ObjectHideFlags: 0
