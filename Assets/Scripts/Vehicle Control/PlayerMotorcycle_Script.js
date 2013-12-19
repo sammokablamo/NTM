@@ -44,6 +44,9 @@ var centerOfMass = -1.5;
 
 private var gameController : GameController; // Reference to the GameControllerIDs
 
+var IdleAudio : AudioSource ;
+var RunningAudio : AudioSource;
+
 function Awake()
 {
 	//setting up reference to joypad integration script
@@ -60,25 +63,19 @@ function Update ()
 	// This is to limith the maximum speed of the car, adjusting the drag probably isn't the best way of doing it,
 	// but it's easy, and it doesn't interfere with the physics processing.
 	rigidbody.drag = rigidbody.velocity.magnitude / 250;	
+	
 	EngineRPM = BackWheelCenter.rpm * GearRatio[CurrentGear]; // Compute the engine RPM based on the average RPM of the two wheels, then call the shift gear function
+	
 	ShiftGears();
 	
-	// set the audio pitch to the percentage of RPM to the maximum RPM plus one, this makes the sound play
-	// up to twice it's pitch, where it will suddenly drop when it switches gears.
-	audio.pitch = Mathf.Abs(EngineRPM / MaxEngineRPM) + 1.0 ;
-	// this line is just to ensure that the pitch does not reach a value higher than is desired.
-	if ( audio.pitch > 2.0 ) 
-	{
-		audio.pitch = 2.0;
-	}
-
+	
 	// finally, apply the values to the wheels.	The torque applied is divided by the current gear, and
 	// multiplied by the user input variable.a
 	//right trigger is positive then apply torque 
 	if (gameController.axis_RightTrigger > 0  && BackWheelCenter.rpm >= 0 && BackWheelCenter.motorTorque >= 0) 
 	{
 	
-		Debug.Log ("Forward", gameObject);
+		//Debug.Log ("Forward", gameObject);
 		BackWheelCenter.motorTorque = EngineTorque / GearRatio[CurrentGear] * gameController.axis_RightTrigger;
 	}
 	
@@ -86,7 +83,7 @@ function Update ()
 	if (gameController.axis_LeftTrigger > 0 && BackWheelCenter.rpm > 0 /* && BackWheelCenter.motorTorque > 0*/)
 	{
 		Brake();
-		Debug.Log ("Braking", gameObject);
+		//Debug.Log ("Braking", gameObject);
 	}
 	
 	//figure out whether to reverse
@@ -94,8 +91,8 @@ function Update ()
 	{
 		CurrentGear = 0;
 		BackWheelCenter.motorTorque = -1 * ((EngineTorque / GearRatio[CurrentGear] * gameController.axis_LeftTrigger)*.25);
-		Debug.Log ("Reverse", gameObject);
-		Debug.Log ("Left Trigger value" + gameController.axis_LeftTrigger, gameObject);
+		//Debug.Log ("Reverse", gameObject);
+		//Debug.Log ("Left Trigger value" + gameController.axis_LeftTrigger, gameObject);
 		
 	}
 	
@@ -110,14 +107,14 @@ function Update ()
 		else
 		{
 		BackWheelCenter.motorTorque = Mathf.InverseLerp(BackWheelCenter.motorTorque, 0, 10 * Time.deltaTime);
-		Debug.Log ("Torque Disappating" + BackWheelCenter.motorTorque, gameObject);
-		Debug.Log ("CurrentVerticalInput: " + gameController.axis_LeftTrigger, gameObject);
+		//Debug.Log ("Torque Disappating" + BackWheelCenter.motorTorque, gameObject);
+		//Debug.Log ("CurrentVerticalInput: " + gameController.axis_LeftTrigger, gameObject);
 		}
 	}
 	//if going forward, zero out torque  over time
 	else if (gameController.axis_RightTrigger == 0 && BackWheelCenter.motorTorque > 0)
 	{
-		Debug.Log ("Yes, I am hitting wind down condition", gameObject);
+		//Debug.Log ("Yes, I am hitting wind down condition", gameObject);
 		if (BackWheelCenter.motorTorque < 1)
 		{
 			BackWheelCenter.motorTorque = 0;
@@ -125,17 +122,20 @@ function Update ()
 		else
 		{
 			BackWheelCenter.motorTorque = Mathf.InverseLerp(BackWheelCenter.motorTorque, 0, 20 * Time.deltaTime);
-			Debug.Log ("Torque Disappating" + BackWheelCenter.motorTorque, gameObject);
-			Debug.Log ("CurrentVerticalInput: " + gameController.axis_RightTrigger, gameObject);
+			//Debug.Log ("Torque Disappating" + BackWheelCenter.motorTorque, gameObject);
+			//Debug.Log ("CurrentVerticalInput: " + gameController.axis_RightTrigger, gameObject);
 		}
 	}
 
 	SetBackWheelChildrenTorque(); //set children back wheel torque to follow center wheel
-	Debug.Log ("Current RPM :" + BackWheelCenter.rpm, gameObject);
-	Debug.Log ("Current Torque :" + BackWheelCenter.motorTorque, gameObject);
+	//Debug.Log ("Current RPM :" + BackWheelCenter.rpm, gameObject);
+	//Debug.Log ("Current Torque :" + BackWheelCenter.motorTorque, gameObject);
 
 	SetSteerAngle(); 	// the steer angle is an arbitrary value multiplied by the user input. amount of steering affecting direction dissipates as RPM increases
 	SetFrontWheelChildrenAngle(); // sam: set other parts of front wheel to mimic steer angle of center wheel collider	
+	
+	
+	AudioManagement ();
 }
 	
  //FixedUpdate should be used instead of Update when dealing with Rigidbody. 
@@ -267,30 +267,53 @@ function Brake()
 	FrontWheelRTMid.brakeTorque = BackWheelCenter.brakeTorque ;
 }
 
+function AudioManagement ()
+{
+	Debug.Log ("Current Gear :" + CurrentGear, gameObject);
+	if ( CurrentGear == 0 )
+	{
+		if (!IdleAudio.isPlaying)
+		{
+			RunningAudio.Stop();
+			IdleAudio.Play();
+		}
+		
+	}
+	else if ( CurrentGear > 0 )
+	{
+		if (!RunningAudio.isPlaying)
+		{
+			IdleAudio.Stop();
+			RunningAudio.Play();
+			// set the audio pitch to the percentage of RPM to the maximum RPM plus one, this makes the sound play
+			// up to twice it's pitch, where it will suddenly drop when it switches gears.
+			audio.pitch = Mathf.Abs(EngineRPM / MaxEngineRPM) + 1 ;
+			// this line is just to ensure that the pitch does not reach a value higher than is desired.
+			if ( audio.pitch > 5.0 ) 
+			{
+				audio.pitch = 5.0;
+			}
+		}
+	}
+}
+	/*
+	public var AudioClip IdleClip;
+public var AudioClip RunningClip;
+			// If the player is currently in the run state...
+	if(anim.GetCurrentAnimatorStateInfo(0).nameHash == hash.locomotionState)
+	{
+		// ... and if the footsteps are not playing...
+		if(!audio.isPlaying)
+			// ... play them.
+			audio.Play();
+	}
+	else
+		// Otherwise stop the footsteps.
+		audio.Stop();
+	
+	// If the shout input has been pressed...
+	if(shout)
+		// ... play the shouting clip where we are.
+		AudioSource.PlayClipAtPoint(shoutingClip, transform.position);
+		*/
 
-
-/*
- As you may see bike wheel has a round tire. And this is the main reason why bike is turning. 
- Not because of rotation of front wheel(honestly, it's main reason of lean) but because of lean.
-  So, I've made few standard Unity wheel controllers "around" my mesh wheel and changing it by javascript while leaning.
-
-
-//the plan: at low speeds. affect week angle. 
-// at high speeds change to this hack where joystick input controls lean and has very subtle affect on wheel 
-
-if ( bikeXangle > = 10 && bikeXangle <20) { // bow Vlevo from 10 to 20 degrees , L1 wheel ( 10 degrees )
- currentRearWheel = rearWheelL1 ; }
- if ( bikeXangle > = 20 && bikeXangle <30) { / / bow Vlevo from 20 to 30 degrees , L2 wheel ( 10 degrees )
- currentRearWheel = rearWheelL2 ; }
- if ( bikeXangle > = 30 && bikeXangle <42 ) { / / bow Vlevo from 30 to 42 degrees , wheel L3 ( 12 degrees )
- currentRearWheel = rearWheelL3 ; }
- if ( bikeXangle > = 42 && bikeXangle <60 ) { / / bow Vlevo from 42 to 60 degrees , wheel L4 ( 18 degrees )
- currentRearWheel = rearWheelL4 ; }
- / / For Front Wheel Cut inye inclination values ​​, Tak as just 3 extra tires
- if ( bikeXangle > = 10 && bikeXangle <24 ) {
- currentFrontWheel = frontWheelL1 ; }
- if ( bikeXangle > = 24 && bikeXangle < 40 ) {
- currentFrontWheel = frontWheelL2 ; }
- if ( bikeXangle > = 40 && bikeXangle <60 ) {
- currentFrontWheel = frontWheelL3 ; }
-*/
