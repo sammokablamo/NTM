@@ -83,7 +83,7 @@ function Update ()
 	}
 	
 	//figure out whether to apply breaks
-	if (gameController.axis_LeftTrigger > 0 && BackWheelCenter.rpm > 0 && BackWheelCenter.motorTorque > 0)
+	if (gameController.axis_LeftTrigger > 0 && BackWheelCenter.rpm > 0 /* && BackWheelCenter.motorTorque > 0*/)
 	{
 		Brake();
 		Debug.Log ("Braking", gameObject);
@@ -99,8 +99,9 @@ function Update ()
 		
 	}
 	
+	//the following two functions are a bit hacky, i just needed a way for the torque to wind down...
 	//after reversing, zero out torque if you're done  over time.
-	if ( BackWheelCenter.motorTorque < 0 && gameController.axis_LeftTrigger == 0 && BackWheelCenter.rpm == 0) //gradually reset torque back to zero if it's negative
+	else if ( BackWheelCenter.motorTorque < 0 && gameController.axis_LeftTrigger == 0 && BackWheelCenter.rpm == 0) //gradually reset torque back to zero if it's negative
 	{
 		if (BackWheelCenter.motorTorque < -.5)
 		{
@@ -117,13 +118,13 @@ function Update ()
 	else if (gameController.axis_RightTrigger == 0  && BackWheelCenter.rpm > 0 && BackWheelCenter.motorTorque > 0)
 	{
 		Debug.Log ("Yes, I am hitting wind down condition", gameObject);
-		if (BackWheelCenter.motorTorque < -.5)
+		if (BackWheelCenter.motorTorque < 1)
 		{
 			BackWheelCenter.motorTorque = 0;
 		}
 		else
 		{
-			BackWheelCenter.motorTorque = Mathf.InverseLerp(BackWheelCenter.motorTorque, 0, 10 * Time.deltaTime);
+			BackWheelCenter.motorTorque = Mathf.InverseLerp(BackWheelCenter.motorTorque, 0, 20 * Time.deltaTime);
 			Debug.Log ("Torque Disappating" + BackWheelCenter.motorTorque, gameObject);
 			Debug.Log ("CurrentVerticalInput: " + gameController.axis_RightTrigger, gameObject);
 		}
