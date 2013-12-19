@@ -115,7 +115,7 @@ function Update ()
 		}
 	}
 	//if going forward, zero out torque  over time
-	else if (gameController.axis_RightTrigger == 0  && BackWheelCenter.rpm > 0 && BackWheelCenter.motorTorque > 0)
+	else if (gameController.axis_RightTrigger == 0 && BackWheelCenter.motorTorque > 0)
 	{
 		Debug.Log ("Yes, I am hitting wind down condition", gameObject);
 		if (BackWheelCenter.motorTorque < 1)
