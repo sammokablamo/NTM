@@ -10,7 +10,6 @@
 
 
 
-
 var BackWheelCenter : WheelCollider; // These variables allow the script to power the wheels of the car.
 var BackWheelLTOuter : WheelCollider; //sam:adding extra colliders to add thickness
 var BackWheelRTOuter : WheelCollider;
@@ -43,6 +42,14 @@ var BIKE : Transform;
 //making center of mass public
 var centerOfMass = -1.5;
 
+private var gameController : GameController; // Reference to the GameControllerIDs
+
+function Awake()
+{
+	//setting up reference to joypad integration script
+	gameController = GetComponent(GameController);
+}
+
 function Start () {
 	// I usually alter the center of mass to make the car more stable. I'ts less likely to flip this way.
 	rigidbody.centerOfMass.y = centerOfMass;
@@ -67,28 +74,33 @@ function Update ()
 
 	// finally, apply the values to the wheels.	The torque applied is divided by the current gear, and
 	// multiplied by the user input variable.a
-	if (Input.GetAxis("Vertical") > 0  && BackWheelCenter.rpm >= 0 && BackWheelCenter.motorTorque >= 0) //vertical input is positive then apply torque
+	//right trigger is positive then apply torque 
+	if (gameController.axis_RightTrigger > 0  && BackWheelCenter.rpm >= 0 && BackWheelCenter.motorTorque >= 0) 
 	{
 	
 		Debug.Log ("Forward", gameObject);
-		BackWheelCenter.motorTorque = EngineTorque / GearRatio[CurrentGear] * Input.GetAxis("Vertical");
+		BackWheelCenter.motorTorque = EngineTorque / GearRatio[CurrentGear] * gameController.axis_RightTrigger;
 	}
 	
-	if (Input.GetAxis("Vertical") < 0 && BackWheelCenter.rpm > 0 && BackWheelCenter.motorTorque >= 0)//figure out whether to apply breaks
+	//figure out whether to apply breaks
+	if (gameController.axis_LeftTrigger > 0 && BackWheelCenter.rpm > 0 && BackWheelCenter.motorTorque > 0)
 	{
 		Brake();
 		Debug.Log ("Braking", gameObject);
 	}
-	else if (Input.GetAxis("Vertical") < 0 && BackWheelCenter.rpm <= 0)//figure out whether to reverse
+	
+	//figure out whether to reverse
+	else if (gameController.axis_LeftTrigger > 0 && BackWheelCenter.rpm <= 0)
 	{
 		CurrentGear = 0;
-		BackWheelCenter.motorTorque = (EngineTorque / GearRatio[CurrentGear] * Input.GetAxis("Vertical"))*.25;
+		BackWheelCenter.motorTorque = -1 * ((EngineTorque / GearRatio[CurrentGear] * gameController.axis_LeftTrigger)*.25);
 		Debug.Log ("Reverse", gameObject);
+		Debug.Log ("Left Trigger value" + gameController.axis_LeftTrigger, gameObject);
 		
 	}
 	
-	//zero out torque if you're done reversing over time.
-	if ( BackWheelCenter.motorTorque < 0 && Input.GetAxis("Vertical") >= 0 && BackWheelCenter.rpm == 0) //gradually reset torque back to zero if it's negative
+	//after reversing, zero out torque if you're done  over time.
+	if ( BackWheelCenter.motorTorque < 0 && gameController.axis_LeftTrigger == 0 && BackWheelCenter.rpm == 0) //gradually reset torque back to zero if it's negative
 	{
 		if (BackWheelCenter.motorTorque < -.5)
 		{
@@ -98,12 +110,13 @@ function Update ()
 		{
 		BackWheelCenter.motorTorque = Mathf.InverseLerp(BackWheelCenter.motorTorque, 0, 10 * Time.deltaTime);
 		Debug.Log ("Torque Disappating" + BackWheelCenter.motorTorque, gameObject);
-		Debug.Log ("CurrentVerticalInput: " + Input.GetAxis("Vertical"), gameObject);
+		Debug.Log ("CurrentVerticalInput: " + gameController.axis_LeftTrigger, gameObject);
 		}
 	}
-	//zero out torque if going forward over time
-	else if (Input.GetAxis("Vertical") == 0  && BackWheelCenter.rpm >= 0 && BackWheelCenter.motorTorque >= 0)
+	//if going forward, zero out torque  over time
+	else if (gameController.axis_RightTrigger == 0  && BackWheelCenter.rpm > 0 && BackWheelCenter.motorTorque > 0)
 	{
+		Debug.Log ("Yes, I am hitting wind down condition", gameObject);
 		if (BackWheelCenter.motorTorque < -.5)
 		{
 			BackWheelCenter.motorTorque = 0;
@@ -112,7 +125,7 @@ function Update ()
 		{
 			BackWheelCenter.motorTorque = Mathf.InverseLerp(BackWheelCenter.motorTorque, 0, 10 * Time.deltaTime);
 			Debug.Log ("Torque Disappating" + BackWheelCenter.motorTorque, gameObject);
-			Debug.Log ("CurrentVerticalInput: " + Input.GetAxis("Vertical"), gameObject);
+			Debug.Log ("CurrentVerticalInput: " + gameController.axis_RightTrigger, gameObject);
 		}
 	}
 
@@ -130,7 +143,7 @@ function FixedUpdate ()
 	//Debug.Log ("Vector3.up is currently:" + BIKE.up, gameObject);
 	if	(BackWheelCenter.isGrounded == true) //if back wheel is touching ground, let tilt be driven by horizontal input tempered by speed
 	{
-		BIKE.rotation.eulerAngles.z = Mathf.LerpAngle(BIKE.rotation.eulerAngles.z, -30 * Input.GetAxis("Horizontal") * (BackWheelCenter.rpm / MaxEngineRPM), 5 * Time.deltaTime);
+		BIKE.rotation.eulerAngles.z = Mathf.LerpAngle(BIKE.rotation.eulerAngles.z, -30 * gameController.x_Axis_LeftStick * (BackWheelCenter.rpm / MaxEngineRPM), 5 * Time.deltaTime);
 	}
 	//This script attempts to keep bike upright
 	else if ( Vector3.Angle( Vector3.up, BIKE.up ) < 30) 
@@ -195,50 +208,50 @@ function SetSteerAngle()
 	//default multiple was 10
 	//trying to make this steer less at high speeds.
 	//MaxEngineRPM tr
-	//original: FrontWheelCenter.steerAngle = 60 * Input.GetAxis("Horizontal");
+	//original: FrontWheelCenter.steerAngle = 60 * gameController.x_Axis_LeftStick;
 	//after a certain speed bike explodes on impact
 	
 	if (BackWheelCenter.rpm < 100)
 	{
-		FrontWheelCenter.steerAngle = 60 * Input.GetAxis("Horizontal") ;
+		FrontWheelCenter.steerAngle = 60 * gameController.x_Axis_LeftStick ;
 	}
 	else if(BackWheelCenter.rpm >= 100 && BackWheelCenter.rpm < 200)
 	{
-		FrontWheelCenter.steerAngle = 50 * Input.GetAxis("Horizontal") ;
+		FrontWheelCenter.steerAngle = 50 * gameController.x_Axis_LeftStick ;
 	}
 	else if(BackWheelCenter.rpm >= 200 && BackWheelCenter.rpm < 300)
 	{
-		FrontWheelCenter.steerAngle = 40 * Input.GetAxis("Horizontal") ;
+		FrontWheelCenter.steerAngle = 40 * gameController.x_Axis_LeftStick ;
 	}
 	else if(BackWheelCenter.rpm >= 300 && BackWheelCenter.rpm < 400)
 	{
-		FrontWheelCenter.steerAngle = 30 * Input.GetAxis("Horizontal") ;
+		FrontWheelCenter.steerAngle = 30 * gameController.x_Axis_LeftStick ;
 	}
 	else if(BackWheelCenter.rpm >= 400 && BackWheelCenter.rpm < 500)
 	{
-		FrontWheelCenter.steerAngle = 20 * Input.GetAxis("Horizontal") ;
+		FrontWheelCenter.steerAngle = 20 * gameController.x_Axis_LeftStick ;
 	}
 	else if(BackWheelCenter.rpm >= 500 && BackWheelCenter.rpm < 600)
 	{
-		FrontWheelCenter.steerAngle = 20 * Input.GetAxis("Horizontal") ;
+		FrontWheelCenter.steerAngle = 20 * gameController.x_Axis_LeftStick ;
 	}
 	else if(BackWheelCenter.rpm >= 600 && BackWheelCenter.rpm < 700)
 	{
-		FrontWheelCenter.steerAngle = 10 * Input.GetAxis("Horizontal") ;
+		FrontWheelCenter.steerAngle = 10 * gameController.x_Axis_LeftStick ;
 	}
 	else if(BackWheelCenter.rpm >= 700 && BackWheelCenter.rpm < 800)
 	{
-		FrontWheelCenter.steerAngle = 5 * Input.GetAxis("Horizontal") ;
+		FrontWheelCenter.steerAngle = 5 * gameController.x_Axis_LeftStick ;
 	}
 		else
 	{
-		FrontWheelCenter.steerAngle = 2 * Input.GetAxis("Horizontal") ;
+		FrontWheelCenter.steerAngle = 2 * gameController.x_Axis_LeftStick ;
 	}
 	//Debug.Log ("Current SteerAngle :" + FrontWheelCenter.steerAngle, gameObject);
 }
 function Brake()
 {
-	BackWheelCenter.brakeTorque = 100 * Mathf.Abs(Input.GetAxis("Vertical")); //apply brake to all wheels based on user input
+	BackWheelCenter.brakeTorque = 100 * Mathf.Abs(gameController.axis_LeftTrigger); //apply brake to all wheels based on user input
 	
 	//update other parts of wheel
 	BackWheelLTOuter.brakeTorque = BackWheelCenter.brakeTorque ;

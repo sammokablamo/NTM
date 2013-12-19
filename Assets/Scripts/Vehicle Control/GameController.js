@@ -22,6 +22,18 @@ var deadzoneType : DeadzoneType = DeadzoneType.CircularClip;
 var deadzone : float = 0.25f;
 var triggerThreshold : float = 0.2f;
 
+/* -----------------------------------------------------------------------------------
+ * Sam: Making formerly private variables public
+ */
+ 
+ // left joystick
+public var x_Axis_LeftStick : float;
+public var y_Axis_LeftStick : float;
+
+// triggers
+public var axis_LeftTrigger : float;
+public var axis_RightTrigger : float; 
+ 
 
 /* -----------------------------------------------------------------------------------
  * INITIAL SETUP
@@ -54,8 +66,8 @@ function Update()
 	/* GET VALUES FOR CONTROLLER AXES */
 	
 	// left joystick
-	var x_Axis_LeftStick : float = OuyaInput.GetAxis(OuyaAxis.LX, player);
-	var y_Axis_LeftStick : float = OuyaInput.GetAxis(OuyaAxis.LY, player);
+	x_Axis_LeftStick  = OuyaInput.GetAxis(OuyaAxis.LX, player);
+	y_Axis_LeftStick  = OuyaInput.GetAxis(OuyaAxis.LY, player);
 	
 	// right joystick
 	var x_Axis_RightStick : float = OuyaInput.GetAxis(OuyaAxis.RX, player);
@@ -66,8 +78,8 @@ function Update()
 	var y_Axis_DPad : float = OuyaInput.GetAxis(OuyaAxis.DY, player);
 	
 	// triggers
-	var axis_LeftTrigger : float = OuyaInput.GetAxis(OuyaAxis.LT, player);
-	var axis_RightTrigger : float = OuyaInput.GetAxis(OuyaAxis.RT, player);
+	axis_LeftTrigger = OuyaInput.GetAxis(OuyaAxis.LT, player);
+	axis_RightTrigger = OuyaInput.GetAxis(OuyaAxis.RT, player);
 	
 	// examples for deadzone clipping (we can choose between three types)
 	var leftStickInput : Vector2 = OuyaInput.CheckDeadzoneCircular(x_Axis_LeftStick, y_Axis_LeftStick, deadzone);
