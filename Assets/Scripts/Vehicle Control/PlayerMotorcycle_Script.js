@@ -34,13 +34,15 @@ var CurrentGear : int = 0;
 var EngineTorque : float = 600.0;
 var MaxEngineRPM : float = 3000.0;
 var MinEngineRPM : float = 1000.0;
+var brakeStrength : float = 200.0;
 private var EngineRPM : float = 0.0;
+var reverseStrength : float = 400;
 
 //sam: variable to reference bike body angle
 var BIKE : Transform;
 
 //making center of mass public
-var centerOfMass = -1.5;
+var centerOfMassHeight = -1.5;
 
 private var gameController : GameController; // Reference to the GameControllerIDs
 
@@ -55,7 +57,7 @@ function Awake()
 
 function Start () {
 	// I usually alter the center of mass to make the car more stable. I'ts less likely to flip this way.
-	rigidbody.centerOfMass.y = centerOfMass;
+	rigidbody.centerOfMass.y = centerOfMassHeight;
 }
 
 function Update () 
@@ -68,73 +70,17 @@ function Update ()
 	
 	ShiftGears();
 	
+	ModifyTorque(); //figure out torque
 	
-	// finally, apply the values to the wheels.	The torque applied is divided by the current gear, and
-	// multiplied by the user input variable.a
-	//right trigger is positive then apply torque 
-	if (gameController.axis_RightTrigger > 0  && BackWheelCenter.rpm >= 0 && BackWheelCenter.motorTorque >= 0) 
-	{
-	
-		//Debug.Log ("Forward", gameObject);
-		BackWheelCenter.motorTorque = EngineTorque / GearRatio[CurrentGear] * gameController.axis_RightTrigger;
-	}
-	
-	//figure out whether to apply breaks
-	if (gameController.axis_LeftTrigger > 0 && BackWheelCenter.rpm > 0 /* && BackWheelCenter.motorTorque > 0*/)
-	{
-		Brake();
-		//Debug.Log ("Braking", gameObject);
-	}
-	
-	//figure out whether to reverse
-	else if (gameController.axis_LeftTrigger > 0 && BackWheelCenter.rpm <= 0)
-	{
-		CurrentGear = 0;
-		BackWheelCenter.motorTorque = -1 * ((EngineTorque / GearRatio[CurrentGear] * gameController.axis_LeftTrigger)*.25);
-		//Debug.Log ("Reverse", gameObject);
-		//Debug.Log ("Left Trigger value" + gameController.axis_LeftTrigger, gameObject);
-		
-	}
-	
-	//the following two functions are a bit hacky, i just needed a way for the torque to wind down...
-	//after reversing, zero out torque if you're done  over time.
-	else if ( BackWheelCenter.motorTorque < 0 && gameController.axis_LeftTrigger == 0 && BackWheelCenter.rpm == 0) //gradually reset torque back to zero if it's negative
-	{
-		if (BackWheelCenter.motorTorque < -.5)
-		{
-			BackWheelCenter.motorTorque = 0;
-		}
-		else
-		{
-		BackWheelCenter.motorTorque = Mathf.InverseLerp(BackWheelCenter.motorTorque, 0, 10 * Time.deltaTime);
-		//Debug.Log ("Torque Disappating" + BackWheelCenter.motorTorque, gameObject);
-		//Debug.Log ("CurrentVerticalInput: " + gameController.axis_LeftTrigger, gameObject);
-		}
-	}
-	//if going forward, zero out torque  over time
-	else if (gameController.axis_RightTrigger == 0 && BackWheelCenter.motorTorque > 0)
-	{
-		//Debug.Log ("Yes, I am hitting wind down condition", gameObject);
-		if (BackWheelCenter.motorTorque < 1)
-		{
-			BackWheelCenter.motorTorque = 0;
-		}
-		else
-		{
-			BackWheelCenter.motorTorque = Mathf.InverseLerp(BackWheelCenter.motorTorque, 0, 20 * Time.deltaTime);
-			//Debug.Log ("Torque Disappating" + BackWheelCenter.motorTorque, gameObject);
-			//Debug.Log ("CurrentVerticalInput: " + gameController.axis_RightTrigger, gameObject);
-		}
-	}
-
 	SetBackWheelChildrenTorque(); //set children back wheel torque to follow center wheel
-	//Debug.Log ("Current RPM :" + BackWheelCenter.rpm, gameObject);
-	//Debug.Log ("Current Torque :" + BackWheelCenter.motorTorque, gameObject);
+	Debug.Log ("Current RPM :" + BackWheelCenter.rpm, gameObject);
+	Debug.Log ("Current Torque :" + BackWheelCenter.motorTorque, gameObject);
 
 	SetSteerAngle(); 	// the steer angle is an arbitrary value multiplied by the user input. amount of steering affecting direction dissipates as RPM increases
 	SetFrontWheelChildrenAngle(); // sam: set other parts of front wheel to mimic steer angle of center wheel collider	
 	
-	
+	SetCenterOfMass();
+			
 	AudioManagement ();
 }
 	
@@ -187,6 +133,69 @@ function ShiftGears() {
 	}
 }
 
+function ModifyTorque()
+{
+	// finally, apply the values to the wheels.	The torque applied is divided by the current gear, and
+	// multiplied by the user input variable.a
+	//right trigger is positive then apply torque 
+	//figure out whether to apply breaks	
+	
+	if (gameController.axis_RightTrigger > 0  && BackWheelCenter.rpm >= 0 && BackWheelCenter.motorTorque >= 0) 
+	{
+	
+		Debug.Log ("Forward", gameObject);
+		BackWheelCenter.motorTorque = EngineTorque / GearRatio[CurrentGear] * gameController.axis_RightTrigger;
+	}
+	
+	//figure out whether to reverse
+	else if (gameController.pressed_Y && BackWheelCenter.rpm <= 100)
+	{
+		CurrentGear = 5;
+		//BackWheelCenter.motorTorque = -1 * ((EngineTorque / GearRatio[CurrentGear] * gameController.axis_LeftTrigger)*.25);
+		BackWheelCenter.motorTorque = -1 * reverseStrength;
+		Debug.Log ("Reverse", gameObject);
+		//Debug.Log ("Left Trigger value" + gameController.axis_LeftTrigger, gameObject);
+		
+	}
+	
+	//the following two functions are a bit hacky, i just needed a way for the torque to wind down...
+	//after reversing, zero out torque if you're done  over time.
+	else if ( gameController.axis_LeftTrigger == 0 && BackWheelCenter.motorTorque < 0 && BackWheelCenter.rpm <= 0) //gradually reset torque back to zero if it's negative
+	{
+		if (BackWheelCenter.motorTorque < -.5)
+		{
+			BackWheelCenter.motorTorque = 0;
+		}
+		else
+		{
+		BackWheelCenter.motorTorque = Mathf.InverseLerp(BackWheelCenter.motorTorque, 0, 10 * Time.deltaTime);
+		Debug.Log ("Torque Disappating" + BackWheelCenter.motorTorque, gameObject);
+		Debug.Log ("CurrentVerticalInput: " + gameController.axis_LeftTrigger, gameObject);
+		}
+	}
+	//if going forward, zero out torque  over time
+	else if (gameController.axis_RightTrigger == 0 && BackWheelCenter.motorTorque > 0)
+	{
+		Debug.Log ("Yes, I am hitting wind down condition", gameObject);
+		if (BackWheelCenter.motorTorque < 1)
+		{
+			BackWheelCenter.motorTorque = 0;
+		}
+		else
+		{
+			BackWheelCenter.motorTorque = Mathf.InverseLerp(BackWheelCenter.motorTorque, 0, 20 * Time.deltaTime);
+			Debug.Log ("Torque Disappating" + BackWheelCenter.motorTorque, gameObject);
+			Debug.Log ("CurrentVerticalInput: " + gameController.axis_RightTrigger, gameObject);
+		}
+	}
+	
+	if (gameController.axis_LeftTrigger > 0 && BackWheelCenter.rpm !=+- 0 /* && BackWheelCenter.motorTorque > 0*/)
+	{
+		Brake();
+		//Debug.Log ("Braking", gameObject);
+	}
+}
+
 function SetBackWheelChildrenTorque() 	//sam: Set all other parts of back tire to equal torque of center
 {
 	BackWheelLTOuter.motorTorque = BackWheelCenter.motorTorque ;
@@ -197,10 +206,12 @@ function SetBackWheelChildrenTorque() 	//sam: Set all other parts of back tire t
 
 function SetFrontWheelChildrenAngle()
 {
+	/*front children are under front hierachy now, unnecessary
 	FrontWheelLTOuter.steerAngle = FrontWheelCenter.steerAngle;
 	FrontWheelRTOuter.steerAngle = FrontWheelCenter.steerAngle;
 	FrontWheelLTMid.steerAngle = FrontWheelCenter.steerAngle;
 	FrontWheelRTMid.steerAngle = FrontWheelCenter.steerAngle;
+	*/
 }
 
 function SetSteerAngle()
@@ -252,8 +263,8 @@ function SetSteerAngle()
 }
 function Brake()
 {
-	BackWheelCenter.brakeTorque = 100 * Mathf.Abs(gameController.axis_LeftTrigger); //apply brake to all wheels based on user input
-	
+	BackWheelCenter.brakeTorque = brakeStrength * gameController.axis_LeftTrigger; //apply brake to all wheels based on user input
+	//Debug.Log ("Braking", gameObject);
 	//update other parts of wheel
 	BackWheelLTOuter.brakeTorque = BackWheelCenter.brakeTorque ;
 	BackWheelRTOuter.brakeTorque = BackWheelCenter.brakeTorque ;
@@ -265,6 +276,19 @@ function Brake()
 	FrontWheelRTOuter.brakeTorque = BackWheelCenter.brakeTorque ;
 	FrontWheelLTMid.brakeTorque = BackWheelCenter.brakeTorque ;
 	FrontWheelRTMid.brakeTorque = BackWheelCenter.brakeTorque ;
+}
+
+function SetCenterOfMass()
+{
+	rigidbody.centerOfMass.z = gameController.y_Axis_LeftStick * 2; //shift center of mass forward or back depending on Y of left stick
+	
+	rigidbody.centerOfMass.x = gameController.x_Axis_LeftStick * 1; //shift center of mass side to side based on left stick
+	
+	if (gameController.axis_LeftTrigger > 0)
+	{
+		rigidbody.centerOfMass.z = rigidbody.centerOfMass.z + gameController.axis_LeftTrigger; //if braking, then add brake value to center of mass to move it forward. 
+	}
+	
 }
 
 function AudioManagement ()

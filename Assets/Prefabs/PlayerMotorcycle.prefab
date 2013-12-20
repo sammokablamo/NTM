@@ -895,7 +895,7 @@ MonoBehaviour:
   - 1.13
   - .930000007
   CurrentGear: 0
-  EngineTorque: 600
+  EngineTorque: 1200
   MaxEngineRPM: 3000
   MinEngineRPM: 1000
   BIKE: {fileID: 400018}

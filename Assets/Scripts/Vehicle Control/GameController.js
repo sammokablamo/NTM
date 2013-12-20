@@ -33,6 +33,10 @@ public var y_Axis_LeftStick : float;
 // triggers
 public var axis_LeftTrigger : float;
 public var axis_RightTrigger : float; 
+
+//X on xbox controller, U on ouya
+public var pressed_U : boolean;
+public var pressed_Y : boolean;
  
 
 /* -----------------------------------------------------------------------------------
@@ -101,8 +105,8 @@ function Update()
 	
 	// O U Y A buttons
 	var pressed_O : boolean = OuyaInput.GetButton(OuyaButton.O, player);
-	var pressed_U : boolean = OuyaInput.GetButton(OuyaButton.U, player);
-	var pressed_Y : boolean = OuyaInput.GetButton(OuyaButton.Y, player);
+	pressed_U = OuyaInput.GetButton(OuyaButton.U, player);
+	pressed_Y = OuyaInput.GetButton(OuyaButton.Y, player);
 	var pressed_A : boolean = OuyaInput.GetButton(OuyaButton.A, player);
 	
 	// joystick click down buttons
