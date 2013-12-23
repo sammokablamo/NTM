@@ -189,7 +189,7 @@ function ModifyTorque()
 		}
 	}
 	
-	if (gameController.axis_LeftTrigger > 0 && BackWheelCenter.rpm !=+- 0 /* && BackWheelCenter.motorTorque > 0*/)
+	if (gameController.axis_LeftTrigger > 0 && BackWheelCenter.rpm != 0 /* && BackWheelCenter.motorTorque > 0*/)
 	{
 		Brake();
 		//Debug.Log ("Braking", gameObject);
